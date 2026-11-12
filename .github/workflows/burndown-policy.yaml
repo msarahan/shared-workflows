@@ -1,9 +1,12 @@
 on:
   workflow_call:
     outputs:
-      skip-product-ci:
+      skip-build-and-test:
         description: Whether this is a same-repository version-update burndown PR to main
-        value: ${{ jobs.identify.outputs.skip-product-ci }}
+        value: ${{ jobs.identify.outputs.skip-build-and-test }}
+      skip-product-ci:
+        description: Compatibility alias for skip-build-and-test; use skip-build-and-test in new callers
+        value: ${{ jobs.identify.outputs.skip-build-and-test }}
 
 permissions:
   contents: read
@@ -13,7 +16,7 @@ jobs:
   identify:
     runs-on: ubuntu-latest
     outputs:
-      skip-product-ci: ${{ steps.policy.outputs.skip-product-ci }}
+      skip-build-and-test: ${{ steps.policy.outputs.skip-build-and-test }}
     steps:
       - name: Get PR Info
         id: pr
@@ -29,7 +32,7 @@ jobs:
             and .head.repo.full_name == $repository
             and ((.head.ref // "") | test("^version-update-[0-9]+\\.[0-9]{2}$"))
           ' <<< "$PR_INFO" >/dev/null; then
-            echo 'skip-product-ci=true' >> "$GITHUB_OUTPUT"
+            echo 'skip-build-and-test=true' >> "$GITHUB_OUTPUT"
           else
-            echo 'skip-product-ci=false' >> "$GITHUB_OUTPUT"
+            echo 'skip-build-and-test=false' >> "$GITHUB_OUTPUT"
           fi

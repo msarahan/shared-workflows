@@ -23,9 +23,11 @@ jobs:
             | fromjson
             | (if has("burndown-policy") then
                 ."burndown-policy".result == "success"
-                and ."burndown-policy".outputs."skip-product-ci" == "true"
+                and (."burndown-policy".outputs."skip-build-and-test"
+                  // ."burndown-policy".outputs."skip-product-ci") == "true"
               else
-                .checks.outputs."skip-product-ci" == "true"
+                (.checks.outputs."skip-build-and-test"
+                  // .checks.outputs."skip-product-ci") == "true"
               end) as $version_update
             | to_entries
             | map(select(
